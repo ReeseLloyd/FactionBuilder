@@ -21,41 +21,47 @@
     /* ── Hero Banner ── */
     .hero {
       width: 100%;
-      max-height: 320px;
-      overflow: hidden;
+      min-height: 280px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #ddd;
+      position: relative;
+      background-color: #ccc;           /* fallback if no image set */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
-    .hero img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+    /* Semi-transparent overlay — keeps text readable over any image.
+       Adjust the last value (0.45) to make it darker or lighter. */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
     }
 
-    /* Fallback title shown when no image is provided */
-    .hero-placeholder {
+    .hero-content {
+      position: relative;  /* sits above the ::before overlay */
+      z-index: 1;
       width: 100%;
       padding: 60px 20px;
       text-align: center;
-      background: linear-gradient(135deg, #e0e0e0 0%, #cccccc 100%);
     }
 
-    .hero-placeholder h1 {
+    .hero-content h1 {
       font-size: clamp(2rem, 6vw, 4rem);
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #333;
+      color: #fff;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
     }
 
-    .hero-placeholder p {
+    .hero-content p {
       margin-top: 10px;
       font-size: clamp(0.9rem, 2.5vw, 1.2rem);
-      color: #666;
+      color: rgba(255, 255, 255, 0.85);
       letter-spacing: 0.04em;
     }
 
@@ -216,14 +222,13 @@
 <body>
 
   <!-- ══ HERO BANNER ══════════════════════════════════════════════════
-       Replace the placeholder block below with an <img> tag once you
-       have a banner image, e.g.:
-         <div class="hero">
-           <img src="images/hero-banner.jpg" alt="Faction Builder">
-         </div>
+       To set a background image, add a style attribute to the .hero div:
+         <div class="hero" style="background-image: url('hero-banner.jpg')">
+       Recommended image size: 1920×480px (4:1 ratio), JPG ~200–400 KB.
+       Adjust the overlay darkness in .hero::before (rgba last value).
   ══════════════════════════════════════════════════════════════════ -->
   <div class="hero">
-    <div class="hero-placeholder">
+    <div class="hero-content">
       <h1>Faction Builder</h1>
       <p>Tabletop miniature army builders</p>
     </div>
