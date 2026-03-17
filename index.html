@@ -152,6 +152,47 @@
       border-top: 1px solid #ddd;
     }
 
+    /* ── Feedback Strip ── */
+    .feedback-strip {
+      max-width: 900px;
+      margin: 0 auto 48px;
+      padding: 0 20px;
+    }
+
+    .feedback-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 28px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #444;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .feedback-link:hover,
+    .feedback-link:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 16px rgba(0,0,0,0.14);
+      outline: none;
+    }
+
+    .feedback-link-text {
+      font-size: 0.95rem;
+      color: #666;
+    }
+
+    .feedback-link-cta {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #333;
+      white-space: nowrap;
+    }
+
     /* ── Responsive: stack vertically on small screens ── */
     @media (max-width: 500px) {
       .app-card-inner {
@@ -227,6 +268,14 @@
     ── -->
 
   </main>
+
+  <!-- ══ FEEDBACK CARD ══════════════════════════════════════════════ -->
+  <div class="feedback-strip">
+    <a href="feedback.html" class="feedback-link">
+      <span class="feedback-link-text">Have feedback or found a bug?</span>
+      <span class="feedback-link-cta">Send Feedback &#8594;</span>
+    </a>
+  </div>
 
   <footer>
     &copy; <span id="year"></span> FactionBuilder.com

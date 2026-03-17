@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback – Faction Builder</title>
+
+  <!-- ══ Replace YOUR_RECAPTCHA_SITE_KEY with your actual v3 site key ══ -->
+  <script src="https://www.google.com/recaptcha/api.js?render=YOUR_RECAPTCHA_SITE_KEY" async defer></script>
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #f4f4f4;
+      color: #222;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top nav bar ── */
+    .topbar {
+      background-color: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar a.back {
+      text-decoration: none;
+      color: #555;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s;
+    }
+
+    .topbar a.back:hover { color: #111; }
+
+    .topbar .site-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #333;
+      letter-spacing: 0.03em;
+    }
+
+    .topbar .separator { color: #ccc; }
+
+    /* ── Main content ── */
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px 60px;
+    }
+
+    .form-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 36px 40px;
+      width: 100%;
+      max-width: 620px;
+    }
+
+    .form-card h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 6px;
+    }
+
+    .form-card .subtitle {
+      font-size: 0.9rem;
+      color: #777;
+      margin-bottom: 28px;
+    }
+
+    /* ── Form fields ── */
+    .field {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 6px;
+    }
+
+    label .optional {
+      font-weight: 400;
+      color: #aaa;
+      margin-left: 4px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: #222;
+      background: #fafafa;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #888;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+      background: #fff;
+    }
+
+    /* Custom select arrow */
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select-wrapper::after {
+      content: '▾';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: #888;
+      font-size: 0.85rem;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.5;
+    }
+
+    /* Two-column row on wider screens */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* ── File upload ── */
+    .file-drop {
+      position: relative;
+      border: 2px dashed #ccc;
+      border-radius: 6px;
+      padding: 22px 16px;
+      text-align: center;
+      background: #fafafa;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .file-drop:hover,
+    .file-drop.drag-over {
+      border-color: #888;
+      background: #f0f0f0;
+    }
+
+    .file-drop input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .file-drop .file-icon {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+      color: #aaa;
+    }
+
+    .file-drop .file-label {
+      font-size: 0.875rem;
+      color: #666;
+    }
+
+    .file-drop .file-label strong {
+      color: #333;
+    }
+
+    .file-drop .file-hint {
+      font-size: 0.78rem;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    #file-chosen {
+      margin-top: 8px;
+      font-size: 0.82rem;
+      color: #555;
+      min-height: 18px;
+    }
+
+    #file-error {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: #c0392b;
+      display: none;
+    }
+
+    /* ── Submit button ── */
+    .submit-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background-color 0.15s;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .submit-btn:hover:not(:disabled) { background-color: #111; }
+    .submit-btn:disabled { background-color: #999; cursor: not-allowed; }
+
+    .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Success / Error banners ── */
+    .status-banner {
+      display: none;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .status-banner.success {
+      background: #eafaf1;
+      border: 1px solid #a9dfbf;
+      color: #1e6a3e;
+    }
+
+    .status-banner.error {
+      background: #fdf3f2;
+      border: 1px solid #f5c6c2;
+      color: #922b21;
+    }
+
+    /* reCAPTCHA badge — keep visible for compliance */
+    .recaptcha-note {
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-top: 14px;
+      text-align: center;
+    }
+
+    .recaptcha-note a { color: #aaa; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.8rem;
+      color: #999;
+      border-top: 1px solid #ddd;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 500px) {
+      .form-card {
+        padding: 24px 18px;
+      }
+
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top bar ── -->
+  <nav class="topbar">
+    <a href="index.html" class="back">&#8592; Back</a>
+    <span class="separator">|</span>
+    <span class="site-name">Faction Builder</span>
+  </nav>
+
+  <main>
+    <div class="form-card">
+
+      <h1>Send Feedback</h1>
+      <p class="subtitle">Bug reports, feature requests, and general feedback are all welcome.</p>
+
+      <!-- Status banners (shown after submit) -->
+      <div id="banner-success" class="status-banner success" role="alert">
+        <strong>Thank you!</strong> Your feedback has been sent. We appreciate you taking the time.
+      </div>
+      <div id="banner-error" class="status-banner error" role="alert">
+        <strong>Something went wrong.</strong> Please try again in a moment, or email us directly at
+        <a href="mailto:factionbuilder@gmail.com">factionbuilder@gmail.com</a>.
+      </div>
+
+      <form id="feedback-form" novalidate>
+
+        <!-- Name + Email -->
+        <div class="field-row">
+          <div class="field">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Your name" required autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email">
+          </div>
+        </div>
+
+        <!-- Feedback Type + Faction Builder -->
+        <div class="field-row">
+          <div class="field">
+            <label for="feedback-type">Feedback Type</label>
+            <div class="select-wrapper">
+              <select id="feedback-type" name="feedbackType" required>
+                <option value="" disabled selected>Select type…</option>
+                <option value="Bug Report">Bug Report</option>
+                <option value="Feature Request">Feature Request</option>
+                <option value="General Feedback">General Feedback</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="faction-builder">Faction Builder</label>
+            <div class="select-wrapper">
+              <select id="faction-builder" name="factionBuilder" required>
+                <option value="" disabled selected>Select app…</option>
+                <option value="Pillage Builder">Pillage Builder</option>
+                <!-- Add new apps here as they launch -->
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message -->
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" placeholder="Describe your feedback in detail…" required></textarea>
+        </div>
+
+        <!-- Image attachment -->
+        <div class="field">
+          <label for="image-upload">Screenshot / Image <span class="optional">(optional)</span></label>
+          <div class="file-drop" id="file-drop">
+            <input type="file" id="image-upload" name="image" accept="image/*">
+            <div class="file-icon">&#128247;</div>
+            <div class="file-label"><strong>Choose a file</strong> or drag and drop</div>
+            <div class="file-hint">PNG, JPG, GIF, WebP &mdash; max 5 MB</div>
+          </div>
+          <div id="file-chosen"></div>
+          <div id="file-error">File is too large. Please choose an image under 5 MB.</div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">
+          <span id="btn-label">Send Feedback</span>
+          <span class="spinner" id="spinner"></span>
+        </button>
+
+        <p class="recaptcha-note">
+          Protected by reCAPTCHA &mdash;
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy</a> &amp;
+          <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Terms</a>
+        </p>
+
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    &copy; <span id="year"></span> FactionBuilder.com
+  </footer>
+
+  <script>
+    // ══ CONFIG — replace both values before going live ══════════════
+    const RECAPTCHA_SITE_KEY  = 'YOUR_RECAPTCHA_SITE_KEY';
+    const APPS_SCRIPT_URL     = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
+    // ════════════════════════════════════════════════════════════════
+
+    const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ── File input: show chosen file name, validate size ────────────
+    const fileInput   = document.getElementById('image-upload');
+    const fileChosen  = document.getElementById('file-chosen');
+    const fileError   = document.getElementById('file-error');
+    const fileDrop    = document.getElementById('file-drop');
+
+    fileInput.addEventListener('change', () => handleFileChange(fileInput.files[0]));
+
+    fileDrop.addEventListener('dragover',  e => { e.preventDefault(); fileDrop.classList.add('drag-over'); });
+    fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('drag-over'));
+    fileDrop.addEventListener('drop', e => {
+      e.preventDefault();
+      fileDrop.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        // Push dropped file into input so the form can read it
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        handleFileChange(file);
+      }
+    });
+
+    function handleFileChange(file) {
+      if (!file) return;
+      fileError.style.display = 'none';
+      if (file.size > MAX_FILE_BYTES) {
+        fileChosen.textContent = '';
+        fileError.style.display = 'block';
+        fileInput.value = '';
+        return;
+      }
+      fileChosen.textContent = `\u2713 ${file.name} (${(file.size / 1024).toFixed(0)} KB)`;
+    }
+
+    // ── Form submit ─────────────────────────────────────────────────
+    document.getElementById('feedback-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      // Basic HTML5 validation
+      if (!this.checkValidity()) {
+        this.reportValidity();
+        return;
+      }
+
+      // Check file size again (in case user bypassed the change handler)
+      const file = fileInput.files[0];
+      if (file && file.size > MAX_FILE_BYTES) {
+        fileError.style.display = 'block';
+        return;
+      }
+
+      setLoading(true);
+      hideBanners();
+
+      try {
+        // 1. Get reCAPTCHA v3 token
+        const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'feedback' });
+
+        // 2. Read image as base64 if provided
+        let imageBase64 = null, imageName = null, imageType = null;
+        if (file) {
+          ({ base64: imageBase64, name: imageName, type: imageType } = await readFileAsBase64(file));
+        }
+
+        // 3. Build payload
+        const payload = {
+          name:           document.getElementById('name').value.trim(),
+          email:          document.getElementById('email').value.trim(),
+          feedbackType:   document.getElementById('feedback-type').value,
+          factionBuilder: document.getElementById('faction-builder').value,
+          message:        document.getElementById('message').value.trim(),
+          recaptchaToken: token,
+          imageBase64,
+          imageName,
+          imageType,
+        };
+
+        // 4. POST to Apps Script (no-cors: response is opaque, that's fine)
+        await fetch(APPS_SCRIPT_URL, {
+          method:  'POST',
+          mode:    'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload),
+        });
+
+        // 5. Show success and reset form
+        showBanner('success');
+        this.reset();
+        fileChosen.textContent = '';
+
+      } catch (err) {
+        console.error('Feedback submission error:', err);
+        showBanner('error');
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // ── Helpers ─────────────────────────────────────────────────────
+    function readFileAsBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload  = () => resolve({
+          base64: reader.result.split(',')[1], // strip data URI prefix
+          name:   file.name,
+          type:   file.type,
+        });
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function setLoading(on) {
+      const btn     = document.getElementById('submit-btn');
+      const label   = document.getElementById('btn-label');
+      const spinner = document.getElementById('spinner');
+      btn.disabled        = on;
+      label.textContent   = on ? 'Sending…' : 'Send Feedback';
+      spinner.style.display = on ? 'block' : 'none';
+    }
+
+    function showBanner(type) {
+      document.getElementById(`banner-${type}`).style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function hideBanners() {
+      document.getElementById('banner-success').style.display = 'none';
+      document.getElementById('banner-error').style.display   = 'none';
+    }
+  </script>
+</body>
+</html>
