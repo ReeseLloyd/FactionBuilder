@@ -73,13 +73,17 @@ function doPost(e) {
 function verifyRecaptcha(token) {
   if (!token) return false;
 
-  var url = 'https://www.google.com/recaptcha/api/siteverify'
-          + '?secret=' + encodeURIComponent(RECAPTCHA_SECRET_KEY)
-          + '&response=' + encodeURIComponent(token);
+  // Send params in the POST body — the token can be 2000+ chars and would
+  // exceed UrlFetchApp's URL length limit if passed as a query parameter.
+  var response = UrlFetchApp.fetch('https://www.google.com/recaptcha/api/siteverify', {
+    method:      'post',
+    contentType: 'application/x-www-form-urlencoded',
+    payload:     'secret='    + encodeURIComponent(RECAPTCHA_SECRET_KEY)
+               + '&response=' + encodeURIComponent(token),
+    muteHttpExceptions: true,
+  });
 
-  var response = UrlFetchApp.fetch(url, { method: 'post', muteHttpExceptions: true });
-  var result   = JSON.parse(response.getContentText());
-
+  var result = JSON.parse(response.getContentText());
   Logger.log('reCAPTCHA result: ' + JSON.stringify(result));
 
   return result.success === true && result.score >= RECAPTCHA_MIN_SCORE;
